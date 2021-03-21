@@ -1,7 +1,7 @@
 {
-  "name": "roistat",
+  "name": "treedata",
   "version": "1.0.0",
-  "description": "test task for roistat",
+  "description": "test task",
   "author": "Biysoltan <bisdance95@yandex.ru>",
   "private": true,
   "scripts": {
