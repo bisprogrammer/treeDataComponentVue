@@ -6,11 +6,19 @@
       <form @submit.prevent="addUser" class="form">
         <div class="form__field">
           <label>Имя</label>
-          <input type="text" placeholder="Имя" v-model="name">
+          <input type="text"
+                  placeholder="Имя"
+                  v-model="name"
+                  @blur="onBlur('nameFieldInit')" >
+          <p v-if="!name && nameFieldInit" class="form__field_error">Поле обязательно для заполнения</p>
         </div>
         <div class="form__field">
           <label>Телефон</label>
-          <input type="text" placeholder="Телефон" v-model="phone">
+          <input type="text"
+                 placeholder="Телефон"
+                 v-model="phone"
+                 @blur="onBlur('phoneFieldInit')">
+          <p v-if="!phone && phoneFieldInit" class="form__field_error">Поле обязательно для заполнения</p>
         </div>
         <div class="form__field">
           <label>Начальник</label>
@@ -90,7 +98,9 @@ export default {
           id: 8
         },
       ],
-      sortValue: null
+      sortValue: null,
+      nameFieldInit: false,
+      phoneFieldInit: false
     }
   },
   components: {
@@ -111,11 +121,11 @@ export default {
       }
       switch(this.sortValue.type) {
         case "ASC": {
-          sortedTreeData = this.sortOrderByAsc(sortedTreeData);
+          sortedTreeData = this.sortOrderBy(sortedTreeData, true);
           break;
         }
         case "DESC": {
-          sortedTreeData = this.sortOrderByDesc(sortedTreeData);
+          sortedTreeData = this.sortOrderBy(sortedTreeData);
           break;
         }
       }
@@ -175,6 +185,8 @@ export default {
       this.name = "";
       this.phone = "";
       this.selectedChief = null;
+      this.nameFieldInit = false;
+      this.phoneFieldInit = false;
       this.showDialog = false;
     },
     collapseAll(treeData) {
@@ -188,30 +200,29 @@ export default {
     sort(sortValue) {
       this.sortValue = sortValue;
     },
-    sortOrderByAsc(treeData) {
+    sortOrderBy(treeData, isAsc) {
       treeData = treeData.sort((valueA, valueB) => {
-          let res = valueA.name == valueB.name ? 0 : valueA.name > valueB.name ? 1 : -1;
+          let res;
+          if (isAsc) {
+            res = valueA.name == valueB.name ? 0 : valueA.name > valueB.name ? 1 : -1;
+          }
+          else {
+            res = valueA.name == valueB.name ? 0 : valueA.name < valueB.name ? 1 : -1;
+          }
           return res;
       });
       treeData.forEach((item) => {
         if (item.children) {
-          this.sortOrderByAsc(item.children);
+          this.sortOrderBy(item.children, isAsc);
         }
       });
       return treeData;
     },
-    sortOrderByDesc(treeData) {
-      treeData = treeData.sort((valueA, valueB) => {
-          let res = valueA.name == valueB.name ? 0 : valueA.name < valueB.name ? 1 : -1;
-          return res;
-      });
-      treeData.forEach((item) => {
-        if (item.children) {
-          this.sortOrderByDesc(item.children);
-        }
-      });
-      return treeData;
-    },
+    onBlur(prop) {
+      if (!this[prop]) {
+        this[prop] = true;
+      }
+    }
   },
   created() {
     if (localStorage.getItem("treeData")) {
@@ -269,8 +280,12 @@ select {
 .form__field {
   margin-bottom: 15px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+}
+.form__field_error {
+  color: red;
 }
 
 .add-button {
